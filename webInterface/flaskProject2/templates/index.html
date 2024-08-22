@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Control Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+        body {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    background-color: #1a1a1a;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    user-select: none;
+}
+
+h2 {
+    font-size: 1em;
+    margin-bottom: 20px;
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+}
+
+.button {
+    display: inline-block;
+    margin: 10px;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #444;
+    color: white;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.1s ease-in;
+    box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+}
+
+.button:hover {
+    background-color: rgb(0, 255, 110);
+    
+    box-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000;
+}
+
+.control-group {
+    margin: 20px 0;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.left-controls, .right-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.speed-control {
+    position: absolute;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.speed-control input[type=range] {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 10px;
+    background: #444;
+    border-radius: 5px;
+    outline: none;
+    transition: background 0.3s;
+}
+
+.speed-control input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ff0000;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+}
+
+.speed-control input[type=range]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #ff0000;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+}
+
+.speed-markers {
+    display: flex;
+    justify-content: center;
+    width: 200px;
+    margin-top: 5px;
+}
+
+.speed-markers span {
+    flex: 1;
+    text-align: center;
+}
+
+@media (min-width: 768px) and (orientation: landscape) {
+    .button-container {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 80%;
+    }
+
+    .left-controls, .right-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <h2>Raspberry Pi Control Interface</h2>
+    <div class="button-container">
+        <div class="control-group left-controls">
+            <button onmousedown="sendCommand('F')" ontouchstart="sendCommand('F')" onmouseup="stopCommand()" ontouchend="stopCommand()" class="button">
+                <span>&#9650;</span> <!-- Up arrow -->
+            </button>
+            <button onmousedown="sendCommand('B')" ontouchstart="sendCommand('B')" onmouseup="stopCommand()" ontouchend="stopCommand()" class="button">
+                <span>&#9660;</span> <!-- Down arrow -->
+            </button>
+        </div>
+        <div class="control-group right-controls">
+            <button onmousedown="sendCommand('L')" ontouchstart="sendCommand('L')" onmouseup="stopCommand()" ontouchend="stopCommand()" class="button">
+                <span>&#9664;</span> <!-- Left arrow -->
+            </button>
+            <button onmousedown="sendCommand('R')" ontouchstart="sendCommand('R')" onmouseup="stopCommand()" ontouchend="stopCommand()" class="button">
+                <span>&#9654;</span> <!-- Right arrow -->
+            </button>
+        </div>
+    </div>
+    <div class="speed-control">
+        <input type="range" min="1" max="4" value="1" id="speedRange" oninput="setSpeedLevel(this.value)">
+        <div class="speed-markers">
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+        </div>
+    </div>
+    <script>
+        function sendCommand(direction) {
+            fetch('/send_command/' + direction)
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Command sent successfully: ' + direction);
+                    } else {
+                        console.error('Error sending command');
+                    }
+                })
+                .catch(error => console.error('Error sending command: ', error));
+        }
+
+        function stopCommand() {
+            fetch('/send_command/S')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Stop command sent successfully');
+                    } else {
+                        console.error('Error sending stop command');
+                    }
+                })
+                .catch(error => console.error('Error sending stop command: ', error));
+        }
+
+        function setSpeedLevel(level) {
+            fetch('/send_command/' + level)
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Speed level set to: ' + level);
+                    } else {
+                        console.error('Error setting speed level');
+                    }
+                })
+                .catch(error => console.error('Error setting speed level: ', error));
+        }
+    </script>
+</body>
+</html>
